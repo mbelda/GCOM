@@ -1,0 +1,2 @@
+# GCOM
+Geometría Computacional
