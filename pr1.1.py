@@ -46,7 +46,7 @@ for x0 in np.arange(0, 1 + delta_x0, delta_x0):
             print('x0: ', x0, ' r: ', r)
             print('V0: ', V0)
             #Siempre sale V0 con 1, 2 o 4 elementos (1 cuando x0 = 0 o 1)
-#plt.show()
+plt.show()
 
 
 
