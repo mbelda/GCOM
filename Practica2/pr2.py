@@ -71,15 +71,15 @@ def huffman_tree(distr):
         tree = np.concatenate((tree, code), axis=None)
     return(tree)
  
-
+#Generamos los arboles de huffman
 tree_en = huffman_tree(distr_en)
-#print(tree_en)
 tree_es = huffman_tree(distr_es)
-#print(tree_es)
 
 #Codifica una letra 
 def codifletra(letra, tree):
     codigo = ''
+    #Recorremos los nodos persiguiendo la letra y guardando las ramas
+    #por las que vamos, pues serán el codigo asociado
     for nodo in np.flip(tree):
         keys = np.array(list(nodo.keys()))
         values = np.array(list(nodo.values()))
@@ -99,11 +99,12 @@ def codif(palabra, tree):
         
     return codigo
 
-#Busca el nodo hijo de otro nodo de un arbol
+#Busca el nodo hijo de otro nodo de un arbol que contiene la letra key
 def buscaSig(key, count, tree):
     for i in range(count+1, len(tree)):
         nodo = np.flip(tree)[i]
         keys = np.array(list(nodo.keys()))
+        #Vemos si la letra key esta la primera en el nodo izquierdo
         if keys[0][0] in key:
             return i
 
@@ -111,14 +112,16 @@ def buscaSig(key, count, tree):
 def decod(codigo, tree):
     palabra = ''
     count = 0
+    #Para cada cifra del codigo tomamos la rama asociada hasta encontrar una hoja
     for i in codigo:
         nodo = np.flip(tree)[count]
         keys = np.array(list(nodo.keys()))
-       
+        #Si es una hoja
         if len(keys[int(i)]) == 1:
             palabra = palabra + keys[int(i)]
             count = 0
         else:
+            #Bajamos al siguiente nodo correspondiente
             count = buscaSig(keys[int(i)], count, tree)
     return palabra
 
@@ -150,6 +153,7 @@ def hill(distr):
         hill = hill + distr['probab'][i]**2      
     return 1/hill
 
+#MAIN
 huf_en, L_en, H_en = huffmanS(tree_en, distr_en)
 print('Codigo huffman ingles: ' + str(huf_en))
 print('Longitud media: ' + str(L_en))
