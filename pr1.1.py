@@ -26,7 +26,7 @@ def orbita(x0,f,n):
     return orbita
 #arange(start,stop,step)
 
-M = 100
+M = 1000
 N = 20
 orb = orbita(x0, logistica, M)
 posiblesk = [i for i in range(M-20, M)]
@@ -51,7 +51,7 @@ for k in reversed(posiblesk):
 if V0 == [] : print('No hay ks')
 errores = []
 V0orb.sort()   
-Vaux = V0orb
+Vaux = V0orb.copy()
 for j in range(0, 10):
     for i in range(len(V0)):
         Vaux[i] = logistica(Vaux[i])
