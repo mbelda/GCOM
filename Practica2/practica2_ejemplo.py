@@ -5,7 +5,7 @@ Práctica 2
 import os
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import math
 
 #### Carpeta donde se encuentran los archivos ####
 ubica = r"C:\Users\Majo\Documents\GitHub\GCOM\Practica2"
@@ -77,6 +77,7 @@ tree_en = huffman_tree(distr_en)
 tree_es = huffman_tree(distr_es)
 #print(tree_es)
 
+#Codifica una letra 
 def codifletra(letra, tree):
     codigo = ''
     for nodo in np.flip(tree):
@@ -90,14 +91,23 @@ def codifletra(letra, tree):
         
     return codigo
 
-
+#Codifica un conjunto de caracteres
 def codif(palabra, tree):
     codigo = ''
     for letra in list(palabra):
         codigo = codigo + codifletra(letra, tree)
         
     return codigo
-        
+
+#Busca el nodo hijo de otro nodo de un arbol
+def buscaSig(key, count, tree):
+    for i in range(count+1, len(tree)):
+        nodo = np.flip(tree)[i]
+        keys = np.array(list(nodo.keys()))
+        if keys[0][0] in key:
+            return i
+
+#Decodifica un codigo binario       
 def decod(codigo, tree):
     palabra = ''
     count = 0
@@ -111,14 +121,9 @@ def decod(codigo, tree):
         else:
             count = buscaSig(keys[int(i)], count, tree)
     return palabra
-        
-def buscaSig(key, count, tree):
-    for i in range(count+1, len(tree)):
-        nodo = np.flip(tree)[i]
-        keys = np.array(list(nodo.keys()))
-        if keys[0][0] in key:
-            return i
-        
+
+#Calcula el codigo huffman binario de un idioma, su longitud media (L)
+#y su entropía (H)             
 def huffmanS(tree, distr):
     dic = []
     L = 0
@@ -131,41 +136,42 @@ def huffmanS(tree, distr):
         H = H - distr['probab'][i]*np.log2(distr['probab'][i])
     return dic, L, H
 
-
+#Calcula el indice de Gini
 def gini(distr):
     GI = 0
     for i in range(len(distr)):
         GI = GI + distr['probab'][i]/len(distr)
     return 1 - 2*GI
 
-
+#Calcula el indice de diversidad de Hill
 def hill(distr):
     hill = 0
     for i in range(len(distr)):
         hill = hill + distr['probab'][i]**2      
     return 1/hill
 
-#Buscar cada estado dentro de cada uno de los dos items
-#tree[0].items()[0][0] ## Esto proporciona un '0'
-#tree[0].items()[1][0] ## Esto proporciona un '1'
-print(decod(codif('español', tree_es), tree_es))
-print(decod(codif('fractal', tree_en), tree_en))
+huf_en, L_en, H_en = huffmanS(tree_en, distr_en)
+print('Codigo huffman ingles: ' + str(huf_en))
+print('Longitud media: ' + str(L_en))
+print('Entropía: ' + str(H_en))
+print('Se cumple el teorema de Shannon, pues H <= L <= H+1')
+
+huf_es, L_es, H_es = huffmanS(tree_es, distr_es)
+print('Codigo huffman ingles: ' + str(huf_es))
+print('Longitud media: ' + str(L_es))
+print('Entropía: ' + str(H_es))
+print('Se cumple el teorema de Shannon, pues H <= L <= H+1')
 
 print('Codificacion de fractal en ingles: ' + codif('fractal', tree_en))
 print('con longitud: ' + str(len(codif('fractal', tree_en))))
+print('La longitud de fractal en ingles en binario usual es: ' + str(math.ceil(np.log2(len(distr_en)))*len('fractal')))
 print('Codificacion de fractal en español: ' + codif('fractal', tree_es))
 print('con longitud: ' + str(len(codif('fractal', tree_es))))
-#Para cada caracter hacen falta x bits en funcion del  numero de estados que haya
+print('La longitud de fractal en español en binario usual es: ' + str(math.ceil(np.log2(len(distr_es)))*len('fractal')))
 
-print('Arbol huffman ingles:')
-print(huffmanS(tree_en, distr_en))
+print('La decodificacion de 0000111011111111111010 es: ' + decod('0000111011111111111010', tree_en))
+print('Codificación de geometria en ingles es: ' + codif('geometria', tree_en))
+print('La decodificación de ' + codif('geometria', tree_en) + ' en ingles es: ' + decod(codif('geometria', tree_en), tree_en))
 
-print('Arbol huffman español:')
-print(huffmanS(tree_es, distr_es))
-
-print(decod('0000111011111111111010', tree_en))
-
-print(gini(distr_en))
-print(hill(distr_en))
-
-plt.show()
+print('El índice de Gini es: ' + str(gini(distr_en)))
+print('El índice de diversidad de Hill es: ' + str(hill(distr_en)))
