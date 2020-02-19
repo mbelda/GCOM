@@ -8,7 +8,7 @@ r_inicial = 3.1
 x0_inicial = 0.2
 delta_x0 = 0.05
 delta_r = 0.001
-M = 100
+M = 1000
 N = 20
 
 #Resta con valor absoluto dos listas
