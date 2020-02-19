@@ -71,8 +71,8 @@ def calculaError(V0orb, r) :
         for i in range(len(V0)):
             Vaux[i] = logistica(Vaux[i], r)
         Vaux.sort()
-        #Tomamos el máximo de las diferencias de las órbitas de
-        #los índices de V0 y los V anteriores a él
+        #Tomamos el máximo de las diferencias entre los elementos de V0orb
+        #y de f^j(V0orb)
         errores.append(max(resta(V0orb, Vaux)))
     errores.sort()
     #Tomamos el percentil noventa de los diez errores anteriores

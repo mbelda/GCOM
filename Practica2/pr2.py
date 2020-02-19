@@ -47,7 +47,6 @@ distr_es = distr_es.sort_values(by='probab', ascending=True)
 distr_es.index=np.arange(0,len(tab_es_states))
 
 
-## Ahora definimos una función que haga exáctamente lo mismo
 def huffman_branch(distr):
     states = np.array(distr['states'])
     probab = np.array(distr['probab'])
