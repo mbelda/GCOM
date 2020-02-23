@@ -6,6 +6,7 @@ import os
 import numpy as np
 import pandas as pd
 import math
+import matplotlib.pyplot as plt
 
 #### Carpeta donde se encuentran los archivos ####
 ubica = r"C:\Users\Majo\Documents\GitHub\GCOM\Practica2"
@@ -36,6 +37,11 @@ tab_en_states = np.array(list(tab_en))
 tab_en_weights = np.array(list(tab_en.values()))
 tab_en_probab = tab_en_weights/float(np.sum(tab_en_weights))
 distr_en = pd.DataFrame({'states': tab_en_states, 'probab': tab_en_probab})
+
+#for i in range(len(distr_en)):
+#    plt.plot(i, distr_en['probab'][i], '-ob')
+
+
 distr_en = distr_en.sort_values(by='probab', ascending=True)
 distr_en.index=np.arange(0,len(tab_en_states))
 
@@ -43,6 +49,10 @@ tab_es_states = np.array(list(tab_es))
 tab_es_weights = np.array(list(tab_es.values()))
 tab_es_probab = tab_es_weights/float(np.sum(tab_es_weights))
 distr_es = pd.DataFrame({'states': tab_es_states, 'probab': tab_es_probab })
+
+#for i in range(len(distr_es)):
+#    plt.plot(i, distr_es['probab'][i], '-or')
+    
 distr_es = distr_es.sort_values(by='probab', ascending=True)
 distr_es.index=np.arange(0,len(tab_es_states))
 
@@ -152,6 +162,7 @@ def hill(distr):
         hill = hill + distr['probab'][i]**2      
     return 1/hill
 
+
 #MAIN
 huf_en, L_en, H_en = huffmanS(tree_en, distr_en)
 print('Codigo huffman ingles: ' + str(huf_en))
@@ -178,3 +189,4 @@ print('La decodificación de ' + codif('geometria', tree_en) + ' en ingles es: '
 
 print('El índice de Gini es: ' + str(gini(distr_en)))
 print('El índice de diversidad de Hill es: ' + str(hill(distr_en)))
+
