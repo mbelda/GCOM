@@ -38,9 +38,12 @@ tab_en_weights = np.array(list(tab_en.values()))
 tab_en_probab = tab_en_weights/float(np.sum(tab_en_weights))
 distr_en = pd.DataFrame({'states': tab_en_states, 'probab': tab_en_probab})
 
-#for i in range(len(distr_en)):
-#    plt.plot(i, distr_en['probab'][i], '-ob')
+for i in range(len(distr_en)):
+    plt.plot(i, distr_en['probab'][i], '-ob')
 
+plt.xlabel("Abecedario")
+plt.ylabel("Probabilidad")
+plt.show()
 
 distr_en = distr_en.sort_values(by='probab', ascending=True)
 distr_en.index=np.arange(0,len(tab_en_states))
@@ -50,8 +53,12 @@ tab_es_weights = np.array(list(tab_es.values()))
 tab_es_probab = tab_es_weights/float(np.sum(tab_es_weights))
 distr_es = pd.DataFrame({'states': tab_es_states, 'probab': tab_es_probab })
 
-#for i in range(len(distr_es)):
-#    plt.plot(i, distr_es['probab'][i], '-or')
+for i in range(len(distr_es)):
+    plt.plot(i, distr_es['probab'][i], '-or')
+
+plt.xlabel("Abecedario")
+plt.ylabel("Probabilidad") 
+plt.show()
     
 distr_es = distr_es.sort_values(by='probab', ascending=True)
 distr_es.index=np.arange(0,len(tab_es_states))
@@ -171,7 +178,7 @@ print('Entropía: ' + str(H_en))
 print('Se cumple el teorema de Shannon, pues H <= L <= H+1')
 
 huf_es, L_es, H_es = huffmanS(tree_es, distr_es)
-print('Codigo huffman ingles: ' + str(huf_es))
+print('Codigo huffman español: ' + str(huf_es))
 print('Longitud media: ' + str(L_es))
 print('Entropía: ' + str(H_es))
 print('Se cumple el teorema de Shannon, pues H <= L <= H+1')
@@ -186,6 +193,8 @@ print('La longitud de fractal en español en binario usual es: ' + str(math.ceil
 print('La decodificacion de 0000111011111111111010 es: ' + decod('0000111011111111111010', tree_en))
 print('Codificación de geometria en ingles es: ' + codif('geometria', tree_en))
 print('La decodificación de ' + codif('geometria', tree_en) + ' en ingles es: ' + decod(codif('geometria', tree_en), tree_en))
+print('Codificación de geometria en español es: ' + codif('geometria', tree_es))
+print('La decodificación de ' + codif('geometria', tree_es) + ' en español es: ' + decod(codif('geometria', tree_es), tree_es))
 
 print('El índice de Gini es: ' + str(gini(distr_en)))
 print('El índice de diversidad de Hill es: ' + str(hill(distr_en)))
