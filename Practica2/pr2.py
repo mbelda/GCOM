@@ -37,29 +37,13 @@ tab_en_states = np.array(list(tab_en))
 tab_en_weights = np.array(list(tab_en.values()))
 tab_en_probab = tab_en_weights/float(np.sum(tab_en_weights))
 distr_en = pd.DataFrame({'states': tab_en_states, 'probab': tab_en_probab})
-
-for i in range(len(distr_en)):
-    plt.plot(i, distr_en['probab'][i], '-ob')
-
-plt.xlabel("Abecedario")
-plt.ylabel("Probabilidad")
-plt.show()
-
 distr_en = distr_en.sort_values(by='probab', ascending=True)
 distr_en.index=np.arange(0,len(tab_en_states))
 
 tab_es_states = np.array(list(tab_es))
 tab_es_weights = np.array(list(tab_es.values()))
 tab_es_probab = tab_es_weights/float(np.sum(tab_es_weights))
-distr_es = pd.DataFrame({'states': tab_es_states, 'probab': tab_es_probab })
-
-for i in range(len(distr_es)):
-    plt.plot(i, distr_es['probab'][i], '-or')
-
-plt.xlabel("Abecedario")
-plt.ylabel("Probabilidad") 
-plt.show()
-    
+distr_es = pd.DataFrame({'states': tab_es_states, 'probab': tab_es_probab })  
 distr_es = distr_es.sort_values(by='probab', ascending=True)
 distr_es.index=np.arange(0,len(tab_es_states))
 
