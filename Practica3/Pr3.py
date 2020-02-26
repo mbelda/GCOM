@@ -38,8 +38,8 @@ def algDBSCAN(metrica):
     
     #Variamos epsilon en (0.1, 1)
     for epsilon in np.linspace(0.11, 1, num = 40, endpoint=False): 
-        #Algoritmo DBSCAN con al menos 100 elementon
-        db = DBSCAN(eps=epsilon, min_samples=100, metric=metrica).fit(X)
+        #Algoritmo DBSCAN con al menos 10 elementos
+        db = DBSCAN(eps=epsilon, min_samples=10, metric=metrica).fit(X)
         core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
         labels = db.labels_
