@@ -23,7 +23,9 @@ for n_clusters in range(1,16):
     else:
         #Si solo hay un cluster, el coeficiente de Silhouette es -1
         silhouette = -1
-    
+
+plt.xlabel("Nº clusters")
+plt.ylabel("Silhouette")
 plt.show()
 
 
@@ -32,9 +34,14 @@ plt.show()
 #con la metrica pasada por argumento
 def algDBSCAN(metrica):
     f1 = plt.figure()
-    f2 = plt.figure()
     ax1 = f1.add_subplot(111)
+    plt.xlabel("Epsilon")
+    plt.ylabel("Silhouette")
+    f2 = plt.figure()
     ax2 = f2.add_subplot(111)
+    plt.xlabel("Nº clusters")
+    plt.ylabel("Silhouette")
+      
     
     #Variamos epsilon en (0.1, 1)
     for epsilon in np.linspace(0.11, 1, num = 40, endpoint=False): 
@@ -55,8 +62,11 @@ def algDBSCAN(metrica):
             silhouette = -1
             
         ax1.plot(epsilon, silhouette, '-ob')
+        
         ax2.plot(n_clusters_, silhouette, 'or')
-
+        
+    
+    
     plt.show()
 
 algDBSCAN('euclidean')
