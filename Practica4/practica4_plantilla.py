@@ -26,28 +26,65 @@ os.getcwd()
 #os.chdir(workpath)
 files = os.listdir(workpath)
 
+
+def mejorada(minimos, distancia, t, supDist):
+    nuevoSup = minimos[0][1]
+    sustituido = False
+    for i in range(len(minimos)):
+        if minimos[i][1] > nuevoSup:
+            nuevoSup = minimos[i][1]
+        if minimos[i][1] == supDist and sustituido == False:
+            #Es el mas lejano, lo sustituimos
+            minimos[i] = [t, distancia]
+            sustituido = True
+    
+    return minimos, nuevoSup  
+
+
+def strDia(intdia):
+    if intdia < 31:
+        return str(intdia + 1) + " de enero de 2019"
+    elif intdia < 59: # + 28
+        return str(intdia + 1 -31) + " de febrero de 2019"
+    elif intdia < 90: # + 31
+        return str(intdia + 1 -59) + " de marzo de 2019"
+    elif intdia < 120: # + 30
+        return str(intdia + 1 -90) + " de abril de 2019"
+    elif intdia < 151: # + 31
+        return str(intdia + 1 -120) + " de mayo de 2019"
+    elif intdia < 181: # + 30
+        return str(intdia + 1 -151) + " de junio de 2019"
+    elif intdia < 212: # + 31
+        return str(intdia + 1 -181) + " de julio de 2019"
+    elif intdia < 243: # + 31
+        return str(intdia + 1 -212) + " de agosto de 2019"
+    elif intdia < 273: # + 30
+        return str(intdia + 1 -243) + " de septiembre de 2019"
+    elif intdia < 304: # + 31
+        return str(intdia + 1 -273) + " de octubre de 2019"
+    elif intdia < 334: # + 30
+        return str(intdia + 1 -304) + " de noviembre de 2019"
+    elif intdia < 365: # + 31
+        return str(intdia + 1 -334) + " de diciembre de 2019"
+
+
 def errorTempMedia(minimos, temps, temp0, rangeLat, rangeLon, rangeP):
     media = np.zeros((len(lats),len(lons),len(level)))
-    
-    # Para cada latitud, longitud y presión sumamos las temperaturas de los 4 días de mínimos
+
     for i in range(len(minimos)):
         for lat in range(rangeLat):
             for lon in range(rangeLon):
                 for p in range(rangeP):
                     media[lat, lon, p] = media[lat, lon, p] + temps[minimos[i][0],p,lon,lat]
-    
-    # Dividimos entre 4 todas esas sumas para obtener la media
+                    
     media = media/4
-    
-    # Calculamos la diferencia en valor absoluto entre la media y la temperatura del día a0 en cada latitud, longitud y presión
     errores = np.absolute(np.subtract(np.transpose(media), temp0[19,:,:,:]))
-    # Devolvemos el máximo de esas diferencias
     return np.amax(errores)
 
 def calculaAnalogos(presiones, presion0):
-    minimos = [[0,1000000], [0,1000000], [0,1000000], [0,1000000]]
+    minimos = [[0,100000], [0,100000], [0,100000], [0,100000]]
+    supDist = 100000
     
-    # Calculamos la distancia para cada día
     for t in range(len(time)):
         distancia = 0
         for lat in range(len(lats)):
@@ -58,11 +95,9 @@ def calculaAnalogos(presiones, presion0):
                 for p in {0,5}:
                     dist = dist + 0.5*(presion0[19,lat,lon,p] - presiones[t,lat,lon,p])**2
                 distancia = distancia + math.sqrt(dist)            
-        
-        # Si la distancia es menor que la mayor que hay en minimos, se sustituye
-        if distancia < minimos[0][1] :
-            minimos[0]=[t,distancia]
-            minimos.sort(key=lambda tup: tup[1], reverse=True)
+         
+        if distancia < supDist :
+            minimos, supDist = mejorada(minimos, distancia, t, supDist) 
     
     return minimos
 
@@ -101,7 +136,6 @@ Distribución espacial de la temperatura en el nivel de 1000hPa, para el primer 
 plt.contour(lons, lats, hgt[1,5,:,:])
 plt.show()
 
-#Fijamos la presión a 500hPa
 hgt2 = hgt[:,5,:,:].reshape(len(time),len(lats)*len(lons))
 
 #Teniendo en cuenta Z, estimamos las 4 comp prals
@@ -155,7 +189,7 @@ analogos = calculaAnalogos(hgt, hgt0)
 analogos.sort(key=lambda x: x[0])
 print("Los cuatro días más análogos son:")
 for i in range(4):
-    print(dt.datetime(2019,1,1) + dt.timedelta(analogos[i][0]))
+    print(strDia(analogos[i][0]))
 
 #Cargamos las temperaturas para predecir la del dia a0
 f = nc.netcdf_file(workpath + "/air.2019.nc", 'r')
@@ -164,7 +198,6 @@ offset = f.variables['air'].add_offset
 scale = f.variables['air'].scale_factor
 air = scale * air + offset
 
-#Cargamos la temperatura del día a0
 f = nc.netcdf_file(workpath + "/air.2020.nc", 'r')
 air0 = f.variables['air'][:].copy()
 offset = f.variables['air'].add_offset
@@ -175,5 +208,5 @@ air0 = scale * air0 + offset
 air = air[:,:,12:21,28:45]
 air0 = air0[:,:,12:21,28:45]
 
-print("El error en la temperatura predicha para el día a0 es: " + \
+print("El error en la temperatura predecida para el dia a0 es: " + \
       str(errorTempMedia(analogos, air, air0, len(lats), len(lons), len(level))))
