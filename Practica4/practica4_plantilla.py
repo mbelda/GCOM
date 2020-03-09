@@ -113,9 +113,9 @@ offset = f.variables['air'].add_offset
 scale = f.variables['air'].scale_factor
 air = scale * air + offset
 
-lats = lats[28:44]
-lons = lons[12:20]
-
+lats = lats[28:45]
+lons = lons[12:21]
+air0 = air0[:,:,12:21,28:45]
 
 def mejorada(minimos, distancia, t, supDist):
     nuevoSup = minimos[0][1]
@@ -182,13 +182,13 @@ def strDia(intdia):
         return str(intdia + 1 -334) + " de diciembre de 2019"
 
 def errorTempMedia(minimos):
-    media = np.zeros((144,73,17))
+    media = np.zeros((len(lats),len(lons),len(level)))
 
     for i in range(len(minimos)):
         for lat in range(len(lats)):
             for lon in range(len(lons)):
                 for p in range(len(level)):
-                    media[lat, lon, p] = media[lat, lon, p] + air[minimos[i][0], lat,lon,p]
+                    media[lat, lon, p] = media[lat, lon, p] + air[minimos[i][0],p,lon,lat]
                     
     media = media/4
     errores = np.absolute(np.subtract(np.transpose(media), air0[19,:,:,:]))
