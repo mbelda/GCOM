@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 from scipy.io import netcdf as nc
 from sklearn.decomposition import PCA
 import math
+import pandas as pd
 
 
 workpath = r"C:\Users\Majo\Desktop\P4 gcom"
@@ -102,7 +103,6 @@ air0 = f.variables['air'][:].copy()
 offset = f.variables['air'].add_offset
 scale = f.variables['air'].scale_factor
 air0 = scale * air0 + offset
-print("Dia a0: " + str(air0[19,:,:,:]))
 
 f = nc.netcdf_file(workpath + "/air.2019.nc", 'r')
 level = f.variables['level'][:].copy() #p
@@ -170,8 +170,16 @@ def strDia(intdia):
         return str(intdia + 1 -151) + " de junio de 2019"
     elif intdia < 212: # + 31
         return str(intdia + 1 -181) + " de julio de 2019"
-    elif intdia < 300: # + 31
-        return str(intdia + 1 -31) + " de febrero de 2019"
+    elif intdia < 243: # + 31
+        return str(intdia + 1 -212) + " de agosto de 2019"
+    elif intdia < 273: # + 30
+        return str(intdia + 1 -243) + " de septiembre de 2019"
+    elif intdia < 304: # + 31
+        return str(intdia + 1 -273) + " de octubre de 2019"
+    elif intdia < 334: # + 30
+        return str(intdia + 1 -304) + " de noviembre de 2019"
+    elif intdia < 365: # + 31
+        return str(intdia + 1 -334) + " de diciembre de 2019"
 
 def errorTempMedia(minimos):
     media = np.zeros((144,73,17))
@@ -183,9 +191,8 @@ def errorTempMedia(minimos):
                     media[lat, lon, p] = media[lat, lon, p] + air[minimos[i][0], lat,lon,p]
                     
     media = media/4
-    print(media)
     errores = np.absolute(np.subtract(np.transpose(media), air0[19,:,:,:]))
     return np.amax(errores)
-    
-print("El día más análogo es el: " + str(minimoDia(minimos)))
+
+print("El día más análogo es el: " + strDia(minimoDia(minimos)))
 print("El error en la temperatura predecida para el dia a0 es: " + str(errorTempMedia(minimos)))
