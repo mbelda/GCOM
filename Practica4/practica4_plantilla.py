@@ -12,6 +12,7 @@ Referencias:
     https://www.esrl.noaa.gov/psd/cgi-bin/db_search/DBListFiles.pl?did=59&tid=81620&vid=1497
 
 """
+from __future__ import division
 import os
 import datetime as dt  # Python standard library datetime  module
 import numpy as np
@@ -20,36 +21,28 @@ from scipy.io import netcdf as nc
 from sklearn.decomposition import PCA
 import math
 
+
 workpath = r"C:\Users\Majo\Desktop\P4 gcom"
 os.getcwd()
 #os.chdir(workpath)
 files = os.listdir(workpath)
 
-
-#f = nc.netcdf_file(workpath + "/" + files[0], 'r')
 f = nc.netcdf_file(workpath + "/hgt.2019.nc", 'r')
 
-print("Hist " + str(f.history))
-print("Dim " + str(f.dimensions))
-print("Var " + str(f.variables))
 time = f.variables['time'][:].copy() #t
-time_bnds = f.variables['time_bnds'][:].copy() #
-time_units = f.variables['time'].units
 level = f.variables['level'][:].copy() #p
-print("Level " + str(level))
 lats = f.variables['lat'][:].copy()
-print("lats " + str(lats))
 lons = f.variables['lon'][:].copy()
-print("lons " + str(lons))
 hgt = f.variables['hgt'][:].copy()
-print(hgt.shape)
-
+offset = f.variables['hgt'].add_offset
+scale = f.variables['hgt'].scale_factor
+hgt = scale * hgt + offset
 f.close()
 
 """
 Ejemplo de evolución temporal de un elemento de aire
 """
-#air[t,p,y,x]
+
 plt.plot(time, hgt[:, 1, 1, 1], c='r')
 plt.show()
 
@@ -73,7 +66,6 @@ hgt2 = hgt[:,5,:,:].reshape(len(time),len(lats)*len(lons))
 
 n_components=4
 
-
 X = hgt2
 Y = hgt2.transpose()
 pca = PCA(n_components=n_components)
@@ -86,8 +78,9 @@ pca.fit(Y)
 print(pca.explained_variance_ratio_)
 out = pca.singular_values_
 
-
 State_pca = pca.fit_transform(X)
+
+
 #Ejercicio de la práctica
 Element_pca = pca.fit_transform(Y)
 Element_pca = Element_pca.transpose(1,0).reshape(n_components,len(lats),len(lons))
@@ -102,53 +95,97 @@ for i in range(1, 5):
 plt.show()
 
 f = nc.netcdf_file(workpath + "/air.2020.nc", 'r')
-
 level = f.variables['level'][:].copy() #p
 lats = f.variables['lat'][:].copy()
 lons = f.variables['lon'][:].copy()
-air = f.variables['air'][:].copy()
-
-Ta0 = air[19,0,0,0]
-xa0 = lats[0]
-ya0 = lons[0]
-pa0 = level[0]
+air0 = f.variables['air'][:].copy()
+offset = f.variables['air'].add_offset
+scale = f.variables['air'].scale_factor
+air0 = scale * air0 + offset
+print("Dia a0: " + str(air0[19,:,:,:]))
 
 f = nc.netcdf_file(workpath + "/air.2019.nc", 'r')
-
-print("Hist " + str(f.history))
-print("Dim " + str(f.dimensions))
-print("Var " + str(f.variables))
-time = f.variables['time'][:].copy() #t
-time_bnds = f.variables['time_bnds'][:].copy() #
-time_units = f.variables['time'].units
 level = f.variables['level'][:].copy() #p
 lats = f.variables['lat'][:].copy()
 lons = f.variables['lon'][:].copy()
 air = f.variables['air'][:].copy()
-air_units = f.variables['air'].units
-print(air.shape)
-
-#for i in range(len(lons)):
-#    if lons[i] == 30 or lons[i] == 50:
-#        print(i)
+offset = f.variables['air'].add_offset
+scale = f.variables['air'].scale_factor
+air = scale * air + offset
 
 lats = lats[28:44]
 lons = lons[12:20]
 
-def dist_eucla0(p,x,y ,T):
-    if level[p] == 500 or level[p] == 1000:
-        lp = 0.5
-    else:
-        lp = 0
-    return math.sqrt((xa0 - lats[x])**2 + (ya0 - lons[y])**2 + (lp*(pa0 - level[p]))**2 + (Ta0 - T)**2)
 
-minimos = [[0,1000]]
+def mejorada(minimos, distancia, t, supDist):
+    nuevoSup = minimos[0][1]
+    sustituido = False
+    for i in range(len(minimos)):
+        if minimos[i][1] > nuevoSup:
+            nuevoSup = minimos[i][1]
+        if minimos[i][1] == supDist and sustituido == False:
+            #Es el mas lejano, lo sustituimos
+            minimos[i] = [t, distancia]
+            sustituido = True
+    
+    return minimos, nuevoSup    
+
+
+minimos = [[0,100000], [0,100000], [0,100000], [0,100000]]
+supDist = 100000
 for t in range(len(time)):
+    distancia = 0
     for lat in range(len(lats)):
         for lon in range(len(lons)):
-            for p in range(len(level)):
-                dist = dist_eucla0(p, lat, lon, air[t,p,lat,lon])
-                if dist < minimos[0][1]:
-                    minimos[0] = [t, dist]
-         
-print(minimos)
+            dist = 0
+            #p = 1000 -> 0
+            #p = 500  -> 5
+            for p in {0,5}:
+                dist = dist + 0.5*(air0[19,lat,lon,p] - air[t,lat,lon,p])**2
+            distancia = distancia + math.sqrt(dist)            
+     
+    if distancia < supDist :
+        minimos, supDist = mejorada(minimos, distancia, t, supDist) 
+
+
+def minimoDia(minimos):
+    minimo = 0
+    for i in range(1, len(minimos)):
+        if minimos[i][1] < minimos[minimo][1]:
+            minimo = i
+    return minimos[minimo][0]
+
+def strDia(intdia):
+    if intdia < 31:
+        return str(intdia + 1) + " de enero de 2019"
+    elif intdia < 59: # + 28
+        return str(intdia + 1 -31) + " de febrero de 2019"
+    elif intdia < 90: # + 31
+        return str(intdia + 1 -59) + " de marzo de 2019"
+    elif intdia < 120: # + 30
+        return str(intdia + 1 -90) + " de abril de 2019"
+    elif intdia < 151: # + 31
+        return str(intdia + 1 -120) + " de mayo de 2019"
+    elif intdia < 181: # + 30
+        return str(intdia + 1 -151) + " de junio de 2019"
+    elif intdia < 212: # + 31
+        return str(intdia + 1 -181) + " de julio de 2019"
+    elif intdia < 300: # + 31
+        return str(intdia + 1 -31) + " de febrero de 2019"
+
+def errorTempMedia(minimos):
+    media = np.zeros((144,73,17))
+
+    for i in range(len(minimos)):
+        for lat in range(len(lats)):
+            for lon in range(len(lons)):
+                for p in range(len(level)):
+                    media[lat, lon, p] = media[lat, lon, p] + air[minimos[i][0], lat,lon,p]
+                    
+    media = media/4
+    print(media)
+    errores = np.absolute(np.subtract(np.transpose(media), air0[19,:,:,:]))
+    return np.amax(errores)
+    
+print("El día más análogo es el: " + str(minimoDia(minimos)))
+print("El error en la temperatura predecida para el dia a0 es: " + str(errorTempMedia(minimos)))
