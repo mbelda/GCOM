@@ -112,11 +112,11 @@ Y = hgt2.transpose()
 pca = PCA(n_components=n_components)
 
 pca.fit(X)
-print(pca.explained_variance_ratio_)
+print("% Varianza explicada: " + str(pca.explained_variance_ratio_))
 out = pca.singular_values_
 
 pca.fit(Y)
-print(pca.explained_variance_ratio_)
+print("% Varianza explicada: " + str(pca.explained_variance_ratio_))
 out = pca.singular_values_
 
 State_pca = pca.fit_transform(X)
@@ -127,7 +127,7 @@ Element_pca = Element_pca.transpose(1,0).reshape(n_components,len(lats),len(lons
 
 fig = plt.figure()
 fig.subplots_adjust(hspace=0.4, wspace=0.4)
-for i in range(1, 5):
+for i in range(1, n_components + 1):
     ax = fig.add_subplot(2, 2, i)
     ax.text(0.5, 90, 'PCA-'+str(i),
            fontsize=18, ha='center')
