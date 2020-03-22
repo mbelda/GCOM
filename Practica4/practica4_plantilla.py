@@ -71,12 +71,14 @@ time = f.variables['time'][:].copy() #t
 level = f.variables['level'][:].copy() #p
 lats = f.variables['lat'][:].copy()
 lons = f.variables['lon'][:].copy()
+lons = lons - 180
 hgt = f.variables['hgt'][:].copy()
 offset = f.variables['hgt'].add_offset
 scale = f.variables['hgt'].scale_factor
 hgt = scale * hgt + offset
 
 f.close()
+
 
 """
 Ejemplo de evolución temporal de un elemento de aire
@@ -95,9 +97,9 @@ np.min(dt_time)
 np.max(dt_time)
 
 """
-Distribución espacial de la temperatura en el nivel de 1000hPa, para el primer día
+Distribución espacial de la temperatura en el nivel de 500hPa, para el primer día
 """
-plt.contour(lons, lats, hgt[1,5,:,:])
+plt.contour(lons, lats, hgt[0,5,:,:])
 plt.show()
 
 #Fijamos la presión a 500hPa
@@ -139,12 +141,11 @@ f = nc.netcdf_file(workpath + "/hgt.2020.nc", 'r')
 level = f.variables['level'][:].copy() #p
 lats = f.variables['lat'][:].copy()
 lons = f.variables['lon'][:].copy()
+lons = lons - 180
 hgt0 = f.variables['hgt'][:].copy()
 offset = f.variables['hgt'].add_offset
 scale = f.variables['hgt'].scale_factor
 hgt0 = scale * hgt0 + offset
-
-lons = lons - 180
 
 lons = lons[64:81] # Entre 64 y 80 están las longitudes entre -20º y 20º
 lats = lats[16:25] # Entre 16 y 24 están las latitudes entre 30º y 50º
