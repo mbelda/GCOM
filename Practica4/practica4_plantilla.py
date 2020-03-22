@@ -29,18 +29,16 @@ files = os.listdir(workpath)
 def errorTempMedia(minimos, temps, temp0p, rangeLon, rangeLat, rangeP, p):
     media = np.zeros((rangeLat,rangeLon))
     
-    
     # Para cada latitud, longitud sumamos las temperaturas de los 4 días de mínimos en el nivel de presión p
     for i in range(len(minimos)):
-        for lon in range(rangeLon):
-            for lat in range(rangeLat):
+        for lat in range(rangeLat):
+            for lon in range(rangeLon):
                     media[lat, lon] = media[lat, lon] + temps[minimos[i][0],p,lat,lon]
     
     # Dividimos entre 4 todas esas sumas para obtener la media
     media = media/4
     
     eam = np.average(np.absolute(np.subtract(media, temp0p)))
-
     return eam
     
 def calculaAnalogos(altgeo, altgeo0):
@@ -96,7 +94,6 @@ dt_time = [dt.date(1800, 1, 1) + dt.timedelta(hours=t) #- offset\
 np.min(dt_time)
 np.max(dt_time)
 
-
 """
 Distribución espacial de la temperatura en el nivel de 1000hPa, para el primer día
 """
@@ -147,13 +144,12 @@ offset = f.variables['hgt'].add_offset
 scale = f.variables['hgt'].scale_factor
 hgt0 = scale * hgt0 + offset
 
-
 lons = lons - 180
 
-lons = lons[65:80] # Entre 65 y 79 están las longitudes en (-20º, 20º) (intervalo abierto)
-lats = lats[17:24] # Entre 17 y 23 están las latitudes en (30º, 50º) (intervalo abierto)
-hgt0 = hgt0[19,:,17:24,65:80] 
-hgt = hgt[:,:,17:24,65:80]
+lons = lons[64:81] # Entre 64 y 80 están las longitudes entre -20º y 20º
+lats = lats[16:25] # Entre 16 y 24 están las latitudes entre 30º y 50º
+hgt0 = hgt0[19,:,16:25,64:81] 
+hgt = hgt[:,:,16:25,64:81]
 
 #Calculamos los 4 días más análogos
 analogos = calculaAnalogos(hgt, hgt0)
@@ -177,7 +173,8 @@ scale = f.variables['air'].scale_factor
 air0 = scale * air0 + offset
 
 #Las restringimos
-air0 = air0[19,0,:,:]
+air = air[:,:,16:25,64:81]
+air0 = air0[19,0,16:25,64:81]
 
 print("El error en la temperatura predicha para el día a0 es: " + \
-      str(errorTempMedia(analogos, air, air0, 144, 73, len(level), 0)))
+      str(errorTempMedia(analogos, air, air0, len(lons), len(lats), len(level), 0)))
