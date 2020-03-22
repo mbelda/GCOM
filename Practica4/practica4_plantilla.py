@@ -26,25 +26,22 @@ os.getcwd()
 #os.chdir(workpath)
 files = os.listdir(workpath)
 
-def errorTempMedia(minimos, temps, temp0, rangeLat, rangeLon, rangeP):
-    media = np.zeros((len(lats),len(lons),len(level)))
+def errorTempMedia(minimos, temps, temp0p, rangeLon, rangeLat, rangeP, p):
+    media = np.zeros((rangeLat,rangeLon))
     
-    # Para cada latitud, longitud y presión sumamos las temperaturas de los 4 días de mínimos
+    # Para cada latitud, longitud sumamos las temperaturas de los 4 días de mínimos en el nivel de presión p
     for i in range(len(minimos)):
         for lat in range(rangeLat):
             for lon in range(rangeLon):
-                for p in range(rangeP):
-                    media[lat, lon, p] = media[lat, lon, p] + temps[minimos[i][0],p,lon,lat]
+                    media[lat, lon] = media[lat, lon] + temps[minimos[i][0],p,lat,lon]
     
     # Dividimos entre 4 todas esas sumas para obtener la media
     media = media/4
     
-    # Calculamos la diferencia en valor absoluto entre la media y la temperatura del día a0 en cada latitud, longitud y presión
-    errores = np.absolute(np.subtract(np.transpose(media), temp0[19,:,:,:]))
-    # Devolvemos el máximo de esas diferencias
-    return np.amax(errores)
-
-def calculaAnalogos(presiones, presion0):
+    eam = np.average(np.absolute(np.subtract(media, temp0p)))
+    return eam
+    
+def calculaAnalogos(altgeo, altgeo0):
     minimos = [[0,1000000], [0,1000000], [0,1000000], [0,1000000]]
     
     # Calculamos la distancia para cada día
@@ -52,12 +49,13 @@ def calculaAnalogos(presiones, presion0):
         distancia = 0
         for lat in range(len(lats)):
             for lon in range(len(lons)):
-                dist = 0
+                #dist = 0
                 #p = 1000 -> 0
                 #p = 500  -> 5
                 for p in {0,5}:
-                    dist = dist + 0.5*(presion0[19,lat,lon,p] - presiones[t,lat,lon,p])**2
-                distancia = distancia + math.sqrt(dist)            
+                    distancia = distancia + 0.5*(altgeo0[p,lat,lon] - altgeo[t,p,lat,lon])**2
+        distancia = math.sqrt(distancia)       
+        
         
         # Si la distancia es menor que la mayor que hay en minimos, se sustituye
         if distancia < minimos[0][1] :
@@ -77,6 +75,7 @@ hgt = f.variables['hgt'][:].copy()
 offset = f.variables['hgt'].add_offset
 scale = f.variables['hgt'].scale_factor
 hgt = scale * hgt + offset
+
 f.close()
 
 """
@@ -145,10 +144,12 @@ offset = f.variables['hgt'].add_offset
 scale = f.variables['hgt'].scale_factor
 hgt0 = scale * hgt0 + offset
 
-lons = lons[12:21]
-lats = lats[28:45]
-hgt0 = hgt0[:,:,12:21,28:45]
-hgt = hgt[:,:,12:21,28:45]
+lons = lons - 180
+
+lons = lons[64:81] # Entre 64 y 80 están las longitudes entre -20º y 20º
+lats = lats[16:25] # Entre 16 y 24 están las latitudes entre 30º y 50º
+hgt0 = hgt0[19,:,16:25,64:81] 
+hgt = hgt[:,:,16:25,64:81]
 
 #Calculamos los 4 días más análogos
 analogos = calculaAnalogos(hgt, hgt0)
@@ -172,8 +173,8 @@ scale = f.variables['air'].scale_factor
 air0 = scale * air0 + offset
 
 #Las restringimos
-air = air[:,:,12:21,28:45]
-air0 = air0[:,:,12:21,28:45]
+air = air[:,:,16:25,64:81]
+air0 = air0[19,0,16:25,64:81]
 
 print("El error en la temperatura predicha para el día a0 es: " + \
-      str(errorTempMedia(analogos, air, air0, len(lats), len(lons), len(level))))
+      str(errorTempMedia(analogos, air, air0, len(lons), len(lats), len(level), 0)))
