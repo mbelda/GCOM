@@ -71,7 +71,6 @@ time = f.variables['time'][:].copy() #t
 level = f.variables['level'][:].copy() #p
 lats = f.variables['lat'][:].copy()
 lons = f.variables['lon'][:].copy()
-lons = lons - 180
 hgt = f.variables['hgt'][:].copy()
 offset = f.variables['hgt'].add_offset
 scale = f.variables['hgt'].scale_factor
@@ -141,16 +140,26 @@ f = nc.netcdf_file(workpath + "/hgt.2020.nc", 'r')
 level = f.variables['level'][:].copy() #p
 lats = f.variables['lat'][:].copy()
 lons = f.variables['lon'][:].copy()
-lons = lons - 180
+for i in range (72, len(lons)): # Cambiamos los ángulos a [-180º,180º)
+    lons[i] = lons[i] - 360
 hgt0 = f.variables['hgt'][:].copy()
 offset = f.variables['hgt'].add_offset
 scale = f.variables['hgt'].scale_factor
 hgt0 = scale * hgt0 + offset
 
-lons = lons[65:80] # Entre 65 y 79 están las longitudes en (-20º, 20º) (intervalo abierto)
+iLons = np.concatenate((np.arange(8),np.arange(-7,0))) 
+nLons = len(lons)
+lons = [lons[i] for i in iLons] # Longitudes en (-20º,20º)
+
 lats = lats[17:24] # Entre 17 y 23 están las latitudes en (30º, 50º) (intervalo abierto)
-hgt0 = hgt0[19,:,17:24,65:80] 
-hgt = hgt[:,:,17:24,65:80]
+
+auxhgt01 = hgt0[19,:,17:24,0:8]
+auxhgt02 = hgt0[19,:,17:24,-7:nLons]
+hgt0 = np.concatenate((auxhgt01,auxhgt02), axis=2)
+
+auxhgt1 = hgt[:,:,17:24,0:8]
+auxhgt2 = hgt[:,:,17:24,-7:nLons]
+hgt = np.concatenate((auxhgt1,auxhgt2), axis=3)
 
 #Calculamos los 4 días más análogos
 analogos = calculaAnalogos(hgt, hgt0)
