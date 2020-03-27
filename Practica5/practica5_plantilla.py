@@ -142,11 +142,11 @@ t = 0
 z0 = -1
 
 eps = 1e-16
-xt = 1/((1-t) + (-1-z)*t + eps)*x
-yt = 1/((1-t) + (-1-z)*t + eps)*y
+xt = 1/((1-t) + np.abs(-1-z)*t + eps)*x
+yt = 1/((1-t) + np.abs(-1-z)*t + eps)*y
 zt = -t + z*(1-t)
-x2t = 1/((1-t) + (-1-z2)*t + eps)*x2
-y2t = 1/((1-t) + (-1-z2)*t + eps)*y2
+x2t = 1/((1-t) + np.abs(-1-z2)*t + eps)*x2
+y2t = 1/((1-t) + np.abs(-1-z2)*t + eps)*y2
 z2t = -t + z2*(1-t)
 
 fig = plt.figure(figsize=(6,6))
@@ -176,11 +176,11 @@ from matplotlib import animation
 
 def animate(t):
     eps = 1e-16
-    xt = 1/((1-t) + (-1-z)*t + eps)*x
-    yt = 1/((1-t) + (-1-z)*t + eps)*y
+    xt = 1/((1-t) + np.abs(-1-z)*t + eps)*x
+    yt = 1/((1-t) + np.abs(-1-z)*t + eps)*y
     zt = -t + z*(1-t)
-    x2t = 1/((1-t) + (-1-z2)*t + eps)*x2
-    y2t = 1/((1-t) + (-1-z2)*t + eps)*y2
+    x2t = 1/((1-t) + np.abs(-1-z2)*t + eps)*x2
+    y2t = 1/((1-t) + np.abs(-1-z2)*t + eps)*y2
     z2t = -t + z2*(1-t)
     
     ax = plt.axes(projection='3d')
@@ -200,7 +200,7 @@ plt.show()
 fig = plt.figure(figsize=(6,6))
 ani = animation.FuncAnimation(fig, animate, np.arange(0,1,0.05), init_func=init,
                               interval=20)
-ani.save("miejemplo.gif", fps = 5) 
+ani.save("ejemplo.gif", fps = 5) 
 
 
 
