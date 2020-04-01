@@ -184,6 +184,8 @@ def animate(t):
     z2t = -t + z2*(1-t)
     
     ax = plt.axes(projection='3d')
+    ax.set_xlim3d(-1,1)
+    ax.set_ylim3d(-1,1)
     ax.set_zlim3d(-1,1)
     ax.plot_surface(xt, yt, zt, rstride=1, cstride=1, cmap='viridis', edgecolor='none')
     ax.plot(x2t,y2t, z2t, '-b', c="black", zorder=3)
