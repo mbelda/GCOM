@@ -6,6 +6,7 @@ APARTADO 3
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
+from mpl_toolkits.mplot3d import axes3d
 
 
 #Dominio
@@ -54,11 +55,9 @@ plt.show()
 fig = plt.figure(figsize=(6,6))
 ani = animation.FuncAnimation(fig, animate2, np.arange(0,1,0.05), init_func=init2,
                               interval=20)
-ani.save("miejemplo.gif", fps = 5)
+ani.save("mi2ejemplo.gif", fps = 5)
 
 
-
-##Version 2
 def animate(t):
     eps = 1e-16
     
@@ -67,7 +66,6 @@ def animate(t):
     yt = 1/(np.tan(np.pi/4 - t) + np.abs(-1-z)*np.tan(t) + eps)*y
     zt = np.tan(-t) + z*np.tan(np.pi/4 - t)
     
-
     #Curva
     x2t = 1/(np.tan(np.pi/4 - t) + np.abs(-1-z2)*np.tan(t) + eps)*x2
     y2t = 1/(np.tan(np.pi/4 - t) + np.abs(-1-z2)*np.tan(t) + eps)*y2
@@ -87,5 +85,5 @@ def init():
 fig = plt.figure(figsize=(6,6))
 ani = animation.FuncAnimation(fig, animate, np.arange(0, np.pi/4,0.05), init_func=init,
                               interval=20)
-ani.save("mi2ejemplo.gif", fps = 5) 
+ani.save("miejemplo.gif", fps = 5) 
 
