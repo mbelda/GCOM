@@ -105,7 +105,7 @@ def proj(x, z, z0=1, alpha=1):
     eps = 1e-16
     x_trans = x/(abs(z0-z)**alpha + eps)
     return(x_trans)
-    #Nótese que añadimos un épsilon para evitar dividi entre 0!!
+    #Nótese que añadimos un épsilon para evitar dividir entre 0!!
 
 fig = plt.figure(figsize=(12,12))
 fig.subplots_adjust(hspace=0.4, wspace=0.2)
