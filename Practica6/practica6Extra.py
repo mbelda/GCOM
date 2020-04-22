@@ -34,7 +34,7 @@ def derivParcial(q,estado0,d):
 
 estadoInicial = [1.0, 1.0, 1.0]
 d = 0.01
-t = np.arange(0.0, 40.0, d)
+t = np.arange(0.0, 100.0, d)
 
 q = odeint(f, estadoInicial, t)
 p = derivParcial(q,estadoInicial,d)/2
@@ -48,16 +48,31 @@ ax = fig.gca(projection='3d')
 ax.plot(p[:, 0], p[:, 1], p[:, 2])
 plt.show()
 
-pasoCondIni = 0.5
-for i0 in np.arange(-1. ,1. ,pasoCondIni):
-    for j0 in np.arange(-1. ,1. ,pasoCondIni):
-        for k0 in np.arange(-1. ,1. ,pasoCondIni):
-            estadoInicial = [i0,j0,k0]
-            q = odeint(f,estadoInicial,t)
-            p = derivParcial(q,estadoInicial,d)/2
-            plt.plot(q[:,0], p[:,0], '-',c=plt.get_cmap("winter")(0))
 
-plt.show()
+# for i in range(3):
+    # plt.figure()
+    # plt.plot(q[:,i], p[:,i], '-',c=plt.get_cmap("winter")(0))
+    # plt.show()
+
+list_q = []
+list_p = []
+
+pasoCondIni = 0.25
+# Con los valores actuales de t, i0, j0 y k0 tarda bastante en ejecutarse 
+for i0 in np.arange(-1. ,1.1 ,pasoCondIni):
+    for j0 in np.arange(-1. ,1.1 ,pasoCondIni):
+        for k0 in np.arange(-1. ,1.1 ,pasoCondIni):
+            estadoInicial = [i0,j0,k0]
+            nuevo_q = odeint(f,estadoInicial,t)
+            list_q.append(nuevo_q)
+            list_p.append(derivParcial(nuevo_q,estadoInicial,d)/2)
+
+
+for i in range(3):
+    plt.figure()
+    for j in range(len(list_q)):
+        plt.plot(list_q[j][:,i], list_p[j][:,i], '-',c=plt.get_cmap("winter")(0))
+    plt.show()
 
 
 
