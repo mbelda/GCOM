@@ -1,0 +1,74 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr 22 11:06:03 2020
+
+@author: Majo
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import odeint
+from mpl_toolkits.mplot3d import Axes3D
+
+alpha = 10.0
+beta = 28.0
+rho = 8.0 / 3.0
+
+def f(estado, t):
+    q1, q2, q3 = estado
+    return alpha * (q2 - q1), beta*q1 - q2 - q1*q3, q1*q2 - rho*q3
+
+def derivParcial(q,estado0,d):
+   dq10, dq20, dq30 = estado0
+   q = np.transpose(q)
+   nCols = len(q[0])
+   dq1 = (q[0,1:nCols]-q[0, 0:(nCols-1)])/d
+   dq1 = np.insert(dq1, 0, dq10) #dq = np.concatenate(([dq0],dq))
+   dq2 = (q[1,1:nCols]-q[1, 0:(nCols-1)])/d
+   dq2 = np.insert(dq2, 0, dq20) #dq = np.concatenate(([dq0],dq))
+   dq3 = (q[2,1:nCols]-q[2, 0:(nCols-1)])/d
+   dq3 = np.insert(dq3, 0, dq30) #dq = np.concatenate(([dq0],dq))
+   
+   dq = np.array([dq1, dq2, dq3])
+   return np.transpose(dq)
+
+estadoInicial = [1.0, 1.0, 1.0]
+d = 0.01
+t = np.arange(0.0, 40.0, d)
+
+q = odeint(f, estadoInicial, t)
+p = derivParcial(q,estadoInicial,d)/2
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.plot(q[:, 0], q[:, 1], q[:, 2])
+plt.show()
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.plot(p[:, 0], p[:, 1], p[:, 2])
+plt.show()
+
+pasoCondIni = 0.5
+for i0 in np.arange(-1. ,1. ,pasoCondIni):
+    for j0 in np.arange(-1. ,1. ,pasoCondIni):
+        for k0 in np.arange(-1. ,1. ,pasoCondIni):
+            estadoInicial = [i0,j0,k0]
+            q = odeint(f,estadoInicial,t)
+            p = derivParcial(q,estadoInicial,d)/2
+            plt.plot(q[:,0], p[:,0], '-',c=plt.get_cmap("winter")(0))
+
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+

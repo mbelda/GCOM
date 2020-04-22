@@ -49,7 +49,7 @@ def animate2(t):
 def init2():
     return animate2(0),
 
-animate2(np.arange(0, 1,0.1)[1])
+animate2(0)
 plt.show()
 
 fig = plt.figure(figsize=(6,6))
@@ -85,5 +85,35 @@ def init():
 fig = plt.figure(figsize=(6,6))
 ani = animation.FuncAnimation(fig, animate, np.arange(0, np.pi/4,0.05), init_func=init,
                               interval=20)
-ani.save("miejemplo.gif", fps = 5) 
+ani.save("miejemplo.gif", fps = 5)
 
+
+
+def animate3(t):
+    eps = 1e-16
+    
+    #Esfera
+    xt = 1/(1 + np.tan(t*np.arctan(-2-z)) + eps)*x
+    yt = 1/(1 + np.tan(t*np.arctan(-2-z)) + eps)*y
+    zt = -1 + np.tan((1-t)*np.arctan(1+z))
+    
+    #Curva
+    x2t = 1/(1 + np.tan(t*np.arctan(-2-z2)) + eps)*x2
+    y2t = 1/(1 + np.tan(t*np.arctan(-2-z2)) + eps)*y2
+    z2t = -1 + np.tan((1-t)*np.arctan(1+z2))
+    
+    ax = plt.axes(projection='3d')
+    ax.set_xlim3d(-1,1)
+    ax.set_ylim3d(-1,1)
+    ax.set_zlim3d(-1,1)
+    ax.plot_surface(xt, yt, zt, rstride=1, cstride=1, cmap='viridis', edgecolor='none')
+    ax.plot(x2t,y2t, z2t, '-b', c="black", zorder=3)
+    return ax,
+
+def init3():
+    return animate3(0),
+
+fig = plt.figure(figsize=(6,6))
+ani = animation.FuncAnimation(fig, animate3, np.arange(0,1,0.05), init_func=init3,
+                              interval=20)
+ani.save("mi3ejemplo.gif", fps = 5)

@@ -137,10 +137,10 @@ plt.show()
 #################################################################  
 #Tomamos un par (q(0), p(0)) y nos quedamos sólo en un trozo/onda de la órbita, sin repeticiones
 #Para eso, tomaremos los periodos de la órbita, que definen las ondas
-    
-def calculaArea(q0, dq0):
-    d = 10**(-3.5)
-    n = int(64/d)
+
+def calculaArea(q0, dq0, delta):
+    d = delta
+    n = int(512/d)
     t = np.arange(n+1)*d
     q = orb(n,q0=q0,dq0=dq0,F=F,d=d)
     dq = deriv(q,dq0=dq0,d=d)
@@ -176,9 +176,20 @@ def calculaArea(q0, dq0):
     # Regla del trapezoide
     return 2*trapz(p[mitad],q[mitad])
 
+#Vamos a calcular el error variando delta
+def calculaErrores(deltaMin, deltaMax, areaRef):
+    errores = np.array([])
+    for deltaAux in np.arange(deltaMin,deltaMax,0.05):
+        areaAux = calculaArea(0., 2., 10**(-deltaAux)) - calculaArea(0.1, 0.1, 10**(-deltaAux))
+        errores = np.append(errores, areaRef - areaAux)
+    
+    errores = np.abs(errores)
+    return errores
+
 #Maximizan [0,2]
 #Minimizan [0.1,0.1]
-area = calculaArea(0., 2.) - calculaArea(0.1, 0.1)
+delta = 10**(-3.5)
+area = calculaArea(0., 2., delta) - calculaArea(0.1, 0.1, delta)
+error = np.amax(calculaErrores(3, 3.5, area))
 print("El área total del espacio de fases es: " + str(area))
-#IMPORTANTE: ES EL VALOR MÁXIMO??
-#IMPORTANTE: Variar d = 10**(-3) más fino para encontrar intervalo de error
+print("con un error máximo de: " + str(error))
