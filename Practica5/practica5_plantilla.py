@@ -100,7 +100,7 @@ ax.set_title('surface');
 """
 
 #Proyección estereográfica
-def proj(x, z, z0=1, alpha=1):
+def proj(x, z, z0=-1, alpha=1):
     z0 = z*0 + z0
     eps = 1e-16
     x_trans = x/(abs(z0-z)**alpha + eps)
