@@ -7,6 +7,7 @@ Created on Wed Apr  8 23:53:36 2020
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy import trapz
 #https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
 
 os.getcwd()
@@ -113,24 +114,29 @@ def simplectica(q0,dq0,F,col=0,d = 10**(-4),n = int(16/d),marker='-'):
     p = dq/2
     plt.plot(q, p, marker,c=plt.get_cmap("winter")(col))
 
+#Dibuja el espacio de fases para las condiciones iniciales en los rangos por parámetro
+def dibujarEspacioFases(q0Min, q0Max, dq0Min, dq0Max):
+    fig = plt.figure(figsize=(8,5))
+    fig.subplots_adjust(hspace=0.4, wspace=0.2)
+    seq_q0 = np.linspace(q0Min, q0Max, num=12)
+    seq_dq0 = np.linspace(dq0Min, dq0Max, num=12)
+    for i in range(len(seq_q0)):
+        for j in range(len(seq_dq0)):
+            q0 = seq_q0[i]
+            dq0 = seq_dq0[j]
+            ax = fig.add_subplot(1,1, 1)
+            col = (1+i+j*(len(seq_q0)))/(len(seq_q0)*len(seq_dq0))
+            #ax = fig.add_subplot(len(seq_q0), len(seq_dq0), 1+i+j*(len(seq_q0)))
+            simplectica(q0=q0,dq0=dq0,F=F,col=col,marker='ro',d= 10**(-3),n = int(16/d))
+    ax.set_xlabel("q(t)", fontsize=12)
+    ax.set_ylabel("p(t)", fontsize=12)
+    #fig.savefig('Simplectic.png', dpi=250)
+    plt.show()
 
-fig = plt.figure(figsize=(8,5))
-fig.subplots_adjust(hspace=0.4, wspace=0.2)
-seq_q0 = np.linspace(0.,1.,num=12)
-seq_dq0 = np.linspace(0.,2,num=12)
-for i in range(len(seq_q0)):
-    for j in range(len(seq_dq0)):
-        q0 = seq_q0[i]
-        dq0 = seq_dq0[j]
-        ax = fig.add_subplot(1,1, 1)
-        col = (1+i+j*(len(seq_q0)))/(len(seq_q0)*len(seq_dq0))
-        #ax = fig.add_subplot(len(seq_q0), len(seq_dq0), 1+i+j*(len(seq_q0)))
-        simplectica(q0=q0,dq0=dq0,F=F,col=col,marker='ro',d= 10**(-3),n = int(16/d))
-ax.set_xlabel("q(t)", fontsize=12)
-ax.set_ylabel("p(t)", fontsize=12)
-#fig.savefig('Simplectic.png', dpi=250)
-plt.show()
-
+##Espacio fásico con condiciones iniciales [0,1]x[0,1]
+dibujarEspacioFases(0., 1., 0., 2.)
+##Espacio fásico con condiciones iniciales [1,2]x[1,2]
+dibujarEspacioFases(1., 2., 2., 4.)
 
 #################################################################    
 #  CÁLCULO DEL ÁREA DEL ESPACIO FÁSICO
@@ -166,7 +172,6 @@ def calculaArea(q0, dq0, delta):
     plt.plot(q[W[0]:W[1]],p[W[0]:W[1]])
     plt.show()
     
-    from numpy import trapz
     
     #Tomamos la mitad de la "curva cerrada" para integrar más fácilmente
     mitad = np.arange(W[0],W[0]+np.int((W[1]-W[0])/2),1)
@@ -176,20 +181,71 @@ def calculaArea(q0, dq0, delta):
     # Regla del trapezoide
     return 2*trapz(p[mitad],q[mitad])
 
+#Calcula el área sin hacer los dibujos de comprobación
+def calculaAreaSinDibujar(q0, dq0, delta):
+    d = delta
+    n = int(64/d)
+    q = orb(n,q0=q0,dq0=dq0,F=F,d=d)
+    dq = deriv(q,dq0=dq0,d=d)
+    p = dq/2
+
+    #Tomaremos los periodos de la órbita, que definen las ondas
+    T, W = periodos(q,d,max=False)
+    if W.size == 0:
+        return "WVacio"
+    else:
+        #Tomamos la mitad de la "curva cerrada" para integrar más fácilmente
+        mitad = np.arange(W[0],W[0]+np.int((W[1]-W[0])/2),1)
+        
+        # Regla del trapezoide
+        return 2*trapz(p[mitad],q[mitad])
+
+#Calcula las condiciones iniciales que maximizan y minimizan el área.
+#Además, devuelve la correspondiente área máxima y mínima
+def calculaExtremos(q0Min, q0Max, dq0Min, dq0Max, delta):
+    areaMax = 0
+    qpMax = [0,0]
+    areaMin = 30
+    qpMin = [0,0]
+    paso = 0.1
+    for q0 in np.arange(q0Min, q0Max + paso, paso):
+        for dq0 in np.arange(dq0Min, dq0Max + paso, paso):
+            area = calculaAreaSinDibujar(q0, dq0, delta)
+            if area != "WVacio": 
+                if area > areaMax:
+                    areaMax = area
+                    qpMax = [q0,dq0]
+                if area < areaMin:
+                    areaMin = area
+                    qpMin = [q0,dq0]
+            
+    return areaMax, qpMax, areaMin, qpMin           
+
 #Vamos a calcular el error variando delta
 def calculaErrores(deltaMin, deltaMax, areaRef):
     errores = np.array([])
     for deltaAux in np.arange(deltaMin,deltaMax,0.05):
-        areaAux = calculaArea(0., 2., 10**(-deltaAux)) - calculaArea(0.1, 0.1, 10**(-deltaAux))
+        areaAux = calculaAreaSinDibujar(0., 2., 10**(-deltaAux)) \
+                    - 1/2*calculaAreaSinDibujar(0.1, 0.1, 10**(-deltaAux))
         errores = np.append(errores, areaRef - areaAux)
     
     errores = np.abs(errores)
     return errores
 
-#Maximizan [0,2]
-#Minimizan [0.1,0.1]
-delta = 10**(-3.5)
-area = calculaArea(0., 2., delta) - calculaArea(0.1, 0.1, delta)
-error = np.amax(calculaErrores(3, 3.5, area))
-print("El área total del espacio de fases es: " + str(area))
+
+delta = 10**(-4)
+#Calculamos el área para D0 por tanto q esta en [0,1] y dq en [0,2]
+areaMax, qpMax, areaMin, qpMin = calculaExtremos(0. ,1. , 0. ,2. , delta)
+area = areaMax - 1/2*areaMin
+error = np.amax(calculaErrores(3.5, 4, area))
+print("El área total del espacio de fases con condiciones iniciales D0 es: " + str(area))
+print("Con la órbita de área máxima en condiciones iniciales " + str(qpMax) \
+        + " y la mínima en " + str(qpMin))
 print("con un error máximo de: " + str(error))
+
+#Calculamos el área para D1 = [1,2]x[1,2] por tanto q esta en [1,2] y dq en [2,4]
+areaMax, qpMax, areaMin, qpMin = calculaExtremos(1. ,2. , 2. ,4. , delta)
+area = areaMax - areaMin
+print("El área total del espacio de fases con condiciones iniciales D1 es: " + str(area))
+print("Con la órbita de área máxima en condiciones iniciales " + str(qpMax) \
+       + " y la mínima en " + str(qpMin))
