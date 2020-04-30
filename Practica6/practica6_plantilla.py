@@ -70,7 +70,8 @@ for i in iseq:
     n = int(32/d)
     t = np.arange(n+1)*d
     q = orb(n,q0=q0,dq0=dq0,F=F,d=d)
-    plt.plot(t, q, 'ro', markersize=0.5/i,label='$\delta$ ='+str(np.around(d,3)),c=plt.get_cmap("winter")(i/np.max(iseq)))
+    plt.plot(t, q, 'ro', markersize=0.5/i,label='$\delta$ ='+str(np.around(d,3)), \
+                 c=plt.get_cmap("winter")(i/np.max(iseq)))
     ax.legend(loc=3, frameon=False, fontsize=12)
 #plt.savefig('Time_granularity.png', dpi=250)
 
@@ -135,8 +136,6 @@ def dibujarEspacioFases(q0Min, q0Max, dq0Min, dq0Max):
 
 ##Espacio fásico con condiciones iniciales [0,1]x[0,1]
 dibujarEspacioFases(0., 1., 0., 2.)
-##Espacio fásico con condiciones iniciales [1,2]x[1,2]
-dibujarEspacioFases(1., 2., 2., 4.)
 
 #################################################################    
 #  CÁLCULO DEL ÁREA DEL ESPACIO FÁSICO
@@ -146,7 +145,7 @@ dibujarEspacioFases(1., 2., 2., 4.)
 
 def calculaArea(q0, dq0, delta):
     d = delta
-    n = int(512/d)
+    n = int(32/d)
     t = np.arange(n+1)*d
     q = orb(n,q0=q0,dq0=dq0,F=F,d=d)
     dq = deriv(q,dq0=dq0,d=d)
@@ -184,15 +183,15 @@ def calculaArea(q0, dq0, delta):
 #Calcula el área sin hacer los dibujos de comprobación
 def calculaAreaSinDibujar(q0, dq0, delta):
     d = delta
-    n = int(64/d)
+    n = int(32/d)
     q = orb(n,q0=q0,dq0=dq0,F=F,d=d)
     dq = deriv(q,dq0=dq0,d=d)
     p = dq/2
 
     #Tomaremos los periodos de la órbita, que definen las ondas
     T, W = periodos(q,d,max=False)
-    if W.size == 0:
-        return "WVacio"
+    if W.size < 2:
+        return - W.size
     else:
         #Tomamos la mitad de la "curva cerrada" para integrar más fácilmente
         mitad = np.arange(W[0],W[0]+np.int((W[1]-W[0])/2),1)
@@ -203,15 +202,15 @@ def calculaAreaSinDibujar(q0, dq0, delta):
 #Calcula las condiciones iniciales que maximizan y minimizan el área.
 #Además, devuelve la correspondiente área máxima y mínima
 def calculaExtremos(q0Min, q0Max, dq0Min, dq0Max, delta):
-    areaMax = 0
-    qpMax = [0,0]
-    areaMin = 30
-    qpMin = [0,0]
+    areaMax = 0.
+    qpMax = [0.,0.]
+    areaMin = 30.
+    qpMin = [0.,0.]
     paso = 0.1
     for q0 in np.arange(q0Min, q0Max + paso, paso):
         for dq0 in np.arange(dq0Min, dq0Max + paso, paso):
             area = calculaAreaSinDibujar(q0, dq0, delta)
-            if area != "WVacio": 
+            if area > 0: 
                 if area > areaMax:
                     areaMax = area
                     qpMax = [q0,dq0]
@@ -222,30 +221,25 @@ def calculaExtremos(q0Min, q0Max, dq0Min, dq0Max, delta):
     return areaMax, qpMax, areaMin, qpMin           
 
 #Vamos a calcular el error variando delta
-def calculaErrores(deltaMin, deltaMax, areaRef):
+def calculaErrores(deltaMin, deltaMax, areaRef, qpMin, qpMax):
     errores = np.array([])
     for deltaAux in np.arange(deltaMin,deltaMax,0.05):
-        areaAux = calculaAreaSinDibujar(0., 2., 10**(-deltaAux)) \
-                    - 1/2*calculaAreaSinDibujar(0.1, 0.1, 10**(-deltaAux))
-        errores = np.append(errores, areaRef - areaAux)
+        areaAuxMax = calculaAreaSinDibujar(qpMax[0], qpMax[1], 10**(-deltaAux))
+        areaAuxMin = calculaAreaSinDibujar(qpMin[0], qpMin[1], 10**(-deltaAux))
+        if areaAuxMin > 0 and areaAuxMax > 0:
+            areaAux = areaAuxMax - areaAuxMin
+            errores = np.append(errores, areaRef - areaAux)
     
     errores = np.abs(errores)
     return errores
 
 
-delta = 10**(-4)
+delta = 10**(-3.5)
 #Calculamos el área para D0 por tanto q esta en [0,1] y dq en [0,2]
 areaMax, qpMax, areaMin, qpMin = calculaExtremos(0. ,1. , 0. ,2. , delta)
-area = areaMax - 1/2*areaMin
-error = np.amax(calculaErrores(3.5, 4, area))
+area = areaMax - areaMin
+error = np.amax(calculaErrores(3, 3.5, area, qpMin, qpMax))
 print("El área total del espacio de fases con condiciones iniciales D0 es: " + str(area))
 print("Con la órbita de área máxima en condiciones iniciales " + str(qpMax) \
         + " y la mínima en " + str(qpMin))
-print("con un error máximo de: " + str(error))
-
-#Calculamos el área para D1 = [1,2]x[1,2] por tanto q esta en [1,2] y dq en [2,4]
-areaMax, qpMax, areaMin, qpMin = calculaExtremos(1. ,2. , 2. ,4. , delta)
-area = areaMax - areaMin
-print("El área total del espacio de fases con condiciones iniciales D1 es: " + str(area))
-print("Con la órbita de área máxima en condiciones iniciales " + str(qpMax) \
-       + " y la mínima en " + str(qpMin))
+print("Con un error de: " + str(error))
