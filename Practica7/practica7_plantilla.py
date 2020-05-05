@@ -24,25 +24,25 @@ Ejemplo para el apartado 1.
 Modifica la figura 3D y/o cambia el color
 https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
 """
-def miGetTestData(delta):
-   x = np.arange(-9.0, 9.0, delta)
-   y = np.arange(-9.0, 9.0, delta)
-   X, Y = np.meshgrid(x, y)
-   print(X.shape)
-   Z1 = np.exp(-(X**2 + Y**2) / 2)
-   Z2 = np.exp(-(((X - 1) / 1.5)**2 + ((Y - 1) / 0.5)**2) / 2)
-   Z = Z2 - Z1
+def getCilindro():
+   ro = np.linspace(0, 6.0, 10)
+   phi = np.linspace(0, 2*np.pi, 100)
+   Ro, Phi = np.meshgrid(ro, phi)
 
-   X = X * 10
-   Y = Y * 10
-   Z = Z * 500
+   X = 6 * np.cos(Phi)
+   Y = Ro
+   Z = 6 * np.sin(Phi)
+
    return X, Y, Z
+ 
 
 fig = plt.figure()
 ax = plt.axes(projection='3d')
-X, Y, Z = miGetTestData(0.15)
-cset = ax.contour(X, Y, Z, 16, extend3d=True,cmap = plt.cm.get_cmap('viridis'))
-ax.clabel(cset, fontsize=9, inline=1)
+X, Y, Z = miGetTestData()
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
+                cmap='viridis', edgecolor='none')
+#cset = ax.contour(X, Y, Z, 16, extend3d=True,cmap = plt.cm.get_cmap('viridis'))
+#ax.clabel(cset, fontsize=9, inline=1)
 plt.show()
 
 
@@ -112,13 +112,13 @@ def animate2D(t,diam):
     theta = 3*np.pi*t
     M = np.array([[np.cos(theta),- np.sin(theta),0],[np.sin(theta),np.cos(theta),0],[0,0,1]])
     
-    ax = plt.axes(xlim=(-30,250), ylim=(-30,250), projection='3d')
+    ax = plt.axes(xlim=(-5,20), ylim=(-5,20), projection='3d')
     #ax.view_init(60, 30)
     
     v = np.array([diam, diam, 0])*t
 
     Xt, Yt, Zt = transf2D(X, Y, Z, M=M, v=v)
-    ax.contour(Xt, Yt, Zt, 16, extend3d=True,cmap = plt.cm.get_cmap('viridis'))
+    ax.plot_surface(Xt, Yt, Zt, rstride=1, cstride=1,cmap='viridis', edgecolor='none') 
     return ax,
     
 
