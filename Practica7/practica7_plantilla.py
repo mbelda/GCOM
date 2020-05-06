@@ -25,20 +25,20 @@ Modifica la figura 3D y/o cambia el color
 https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
 """
 def getCilindro():
-   ro = np.linspace(0, 6.0, 10)
+   ro = np.linspace(0, 10, 25)
    phi = np.linspace(0, 2*np.pi, 100)
    Ro, Phi = np.meshgrid(ro, phi)
 
-   X = 6 * np.cos(Phi)
+   X = 3 * np.cos(Phi)
    Y = Ro
-   Z = 6 * np.sin(Phi)
+   Z = 3 * np.sin(Phi)
 
    return X, Y, Z
  
 
 fig = plt.figure()
 ax = plt.axes(projection='3d')
-X, Y, Z = miGetTestData()
+X, Y, Z = getCilindro()
 ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
                 cmap='viridis', edgecolor='none')
 #cset = ax.contour(X, Y, Z, 16, extend3d=True,cmap = plt.cm.get_cmap('viridis'))
@@ -91,28 +91,39 @@ def calcCentroide1(x,y):
     yC = np.sum(y)/nElems
     return xC, yC
 
-# def calcDiam2(X,Y):
-    # nFilas, nCols = X.shape
-    # max = 0
-    # for i1 in range(nFilas):
-        # print(i1)
-        # for j1 in range(nCols):
-            # for i2 in range(nFilas - i1):
-                # for j2 in range(nCols - j1):
-                    # dist = (X[i1,j1]-X[i2,j2])**2 + (Y[i1,j1]-Y[i2,j2])**2
-                    # if dist > max:
-                        # max = dist
-    # return np.sqrt(max)
+def calcDiam3(X,Y,Z):
+    nFilas, nCols = X.shape
+    max = 0
+    for i1 in range(X.shape[0]):
+        for j1 in range(X.shape[1]):
+            for i2 in range(X.shape[0] - i1):
+                for j2 in range(X.shape[1] - j1):
+                    dist = (X[i1,j1]-X[i2,j2])**2 + (Y[i1,j1]-Y[i2,j2])**2 + (Z[i1,j1]-Z[i2,j2])**2
+                    if dist > max:
+                        max = dist
+    return np.sqrt(max)
     
-def calcDiam(xMax, xMin, yMax, yMin):
-    return np.sqrt((xMax - xMin)**2 + (yMax - yMin)**2)
+    
+def calcDiam2(X,Y):
+    nElems = len(X)
+    max = 0
+    for i1 in range(0,nElems,4):
+        print(i1)
+        for i2 in range(0,nElems - i1,4):
+            dist = (X[i1]-X[i2])**2 + (Y[i1]-Y[i2])**2
+            if dist > max:
+                max = dist
+    return np.sqrt(max)
+    
+# def calcDiam(xMax, xMin, yMax, yMin):
+    # return np.sqrt((xMax - xMin)**2 + (yMax - yMin)**2)
 
 
 def animate2D(t,diam):
     theta = 3*np.pi*t
     M = np.array([[np.cos(theta),- np.sin(theta),0],[np.sin(theta),np.cos(theta),0],[0,0,1]])
     
-    ax = plt.axes(xlim=(-5,20), ylim=(-5,20), projection='3d')
+    ax = plt.axes(xlim=(-5,20), ylim=(-5,20), zlim=(-5,20),projection='3d')
     #ax.view_init(60, 30)
     
     v = np.array([diam, diam, 0])*t
@@ -122,17 +133,19 @@ def animate2D(t,diam):
     return ax,
     
 
-diametro2 = calcDiam(X.max(),X.min(),Y.max(),Y.min())
+#diametro3 = calcDiam(X.max(),X.min(),Y.max(),Y.min())
+diametro3 = calcDiam3(X,Y,Z)
+print('diámetro',diametro3)
 
 def init2D():
-    return animate2D(0,diametro2),
+    return animate2D(0,diametro3),
 
-animate2D(np.arange(0.1, 1,0.1)[5],diametro2)
+animate2D(np.arange(0.1, 1,0.1)[5],diametro3)
 plt.show()
 
 
 fig = plt.figure(figsize=(6,6))
-ani = animation.FuncAnimation(fig, animate2D, frames=np.arange(0,1,0.025), init_func=init2D, fargs=[diametro2],
+ani = animation.FuncAnimation(fig, animate2D, frames=np.arange(0,1,0.025), init_func=init2D, fargs=[diametro3],
                               interval=20)
 os.chdir(vuestra_ruta)
 ani.save("p7a.gif", fps = 10)  
@@ -180,6 +193,7 @@ x0 = xx[zz<240]
 y0 = yy[zz<240]
 z0 = zz[zz<240]/256.
 
+
 #Variable de estado: color
 col = plt.get_cmap("viridis")(np.array(0.1+z0))
 
@@ -205,17 +219,19 @@ def animate(t,diam):
     ax.scatter(XYZ[0],XYZ[1],c=col,s=0.1,animated=True)
     return ax,
 
-diametro1 = calcDiam(x0.max(),x0.min(),y0.max(),y0.min())
+#diametro2 = calcDiam(x0.max(),x0.min(),y0.max(),y0.min())
+diametro2 = calcDiam2(x0,y0)
+print('diámetro', diametro2)
 
 def init():
-    return animate(0,diametro1),
+    return animate(0,diametro2),
 
-animate(0,diametro1)
+animate(0,diametro2)
 plt.show()
 
 
 fig = plt.figure(figsize=(6,6))
-ani = animation.FuncAnimation(fig, animate, frames=np.arange(0,1,0.025), init_func=init, fargs=[diametro1],
+ani = animation.FuncAnimation(fig, animate, frames=np.arange(0,1,0.025), init_func=init, fargs=[diametro2],
                               interval=20)
 os.chdir(vuestra_ruta)
 ani.save("p7b.gif", fps = 10)  
