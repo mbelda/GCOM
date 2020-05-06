@@ -14,10 +14,12 @@ alpha = 10.0
 beta = 28.0
 rho = 8.0 / 3.0
 
+#Ecuaciones de Lorenz
 def f(estado, t):
     q1, q2, q3 = estado
     return alpha * (q2 - q1), beta*q1 - q2 - q1*q3, q1*q2 - rho*q3
 
+#Calcula las derivadas parciales de las tres variables
 def derivParcial(q,estado0,d):
    dq10, dq20, dq30 = estado0
    q = np.transpose(q)
@@ -32,42 +34,47 @@ def derivParcial(q,estado0,d):
    dq = np.array([dq1, dq2, dq3])
    return np.transpose(dq)
 
-estadoInicial = [1.0, 1.0, 1.0]
+
+#Discretizamos el sistema
 d = 0.01
 t = np.arange(0.0, 100.0, d)
 
+#Fijamos las condiciones iniciales
+estadoInicial = [1.0, 1.0, 1.0]
+
+#Calculamos la órbita del sistema para las condiciones iniciales dadas
 q = odeint(f, estadoInicial, t)
 p = derivParcial(q,estadoInicial,d)/2
 
+#Representamos q
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.plot(q[:, 0], q[:, 1], q[:, 2])
 plt.show()
+
+#Representamos p
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.plot(p[:, 0], p[:, 1], p[:, 2])
 plt.show()
 
 
-# for i in range(3):
-    # plt.figure()
-    # plt.plot(q[:,i], p[:,i], '-',c=plt.get_cmap("winter")(0))
-    # plt.show()
+#Calculamos el espacio fásico para las condiciones iniciales [-1,1]x[-1,1]x[-1,1]
 
 list_q = []
 list_p = []
 
 pasoCondIni = 0.25
 # Con los valores actuales de t, i0, j0 y k0 tarda bastante en ejecutarse 
-for i0 in np.arange(-1. ,1.1 ,pasoCondIni):
-    for j0 in np.arange(-1. ,1.1 ,pasoCondIni):
-        for k0 in np.arange(-1. ,1.1 ,pasoCondIni):
+for i0 in np.arange(-1. ,1. + pasoCondIni ,pasoCondIni):
+    for j0 in np.arange(-1. ,1. + pasoCondIni ,pasoCondIni):
+        for k0 in np.arange(-1. ,1. + pasoCondIni ,pasoCondIni):
             estadoInicial = [i0,j0,k0]
             nuevo_q = odeint(f,estadoInicial,t)
             list_q.append(nuevo_q)
             list_p.append(derivParcial(nuevo_q,estadoInicial,d)/2)
 
-
+#Representamos el espacio fásico en tres gráficas
 for i in range(3):
     plt.figure()
     for j in range(len(list_q)):
