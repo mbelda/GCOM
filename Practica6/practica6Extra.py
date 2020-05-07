@@ -42,7 +42,7 @@ t = np.arange(0.0, 100.0, d)
 #Fijamos las condiciones iniciales
 estadoInicial = [1.0, 1.0, 1.0]
 
-#Calculamos la órbita del sistema para las condiciones iniciales dadas
+#Calculamos las órbitas del sistema para las condiciones iniciales dadas
 q = odeint(f, estadoInicial, t)
 p = derivParcial(q,estadoInicial,d)/2
 
@@ -50,12 +50,14 @@ p = derivParcial(q,estadoInicial,d)/2
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.plot(q[:, 0], q[:, 1], q[:, 2])
+plt.title("q(t)")
 plt.show()
 
 #Representamos p
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.plot(p[:, 0], p[:, 1], p[:, 2])
+plt.title("p(t)")
 plt.show()
 
 
@@ -77,6 +79,8 @@ for i0 in np.arange(-1. ,1. + pasoCondIni ,pasoCondIni):
 #Representamos el espacio fásico en tres gráficas
 for i in range(3):
     plt.figure()
+    plt.xlabel("q" + str(i+1))
+    plt.ylabel("p" + str(i+1))
     for j in range(len(list_q)):
         plt.plot(list_q[j][:,i], list_p[j][:,i], '-',c=plt.get_cmap("winter")(0))
     plt.show()
