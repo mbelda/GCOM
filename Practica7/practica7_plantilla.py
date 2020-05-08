@@ -82,7 +82,6 @@ def calcDiam2(X,Y):
     nElems = len(X)
     maximo = 0
     for i1 in range(0,nElems,4):
-        print(i1)
         for i2 in range(0,nElems - i1,4):
             dist = (X[i1]-X[i2])**2 + (Y[i1]-Y[i2])**2
             if dist > maximo:
@@ -186,9 +185,7 @@ z  = img[:,:,0]
 zz = np.asarray(z).reshape(-1)
 
 
-"""
-Consideraremos sólo los elementos con zz < 240 
-"""
+#Consideraremos sólo los elementos con zz < 240 
 #Variables de estado coordenadas
 x0 = xx[zz<240]
 y0 = yy[zz<240]
